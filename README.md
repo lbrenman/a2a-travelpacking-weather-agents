@@ -2,7 +2,7 @@
 
 > Two interoperating Agent2Agent (A2A) agents in one repo: a **US Weather Agent** and a **Trip Packing Agent** that delegates to it. Run either one alone, or both together in a single Codespace.
 
-[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/lbrenman/a2a-agents)
+[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/lbrenman/a2a-travelpacking-weather-agents)
 
 ## Overview
 
@@ -47,8 +47,8 @@ Ports 3000 and 3001 auto-forward. Set a port to **Public** in the Ports tab only
 ### Local
 
 ```bash
-git clone https://github.com/lbrenman/a2a-agents.git
-cd a2a-agents
+git clone https://github.com/lbrenman/a2a-travelpacking-weather-agents.git
+cd a2a-travelpacking-weather-agents
 npm install
 cp .env.example .env    # edit the two API keys
 npm run dev
@@ -207,7 +207,7 @@ Unrecognized input returns `status.state: "input-required"` with a prompt rather
 ## Project structure
 
 ```
-a2a-agents/
+a2a-travelpacking-weather-agents/
 ├── .devcontainer/devcontainer.json   # Node 20, forwards 3000 + 3001
 ├── .env                              # single config for both agents (gitignored)
 ├── .env.example
