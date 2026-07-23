@@ -1,0 +1,31 @@
+{
+  "name": "a2a-agents",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Two interoperating A2A agents — a US weather agent and a trip packing agent that delegates to it — runnable together or independently from a single Codespace",
+  "engines": { "node": ">=20" },
+  "scripts": {
+    "dev": "concurrently -n weather,packing -c cyan,magenta --kill-others-on-fail \"npm:dev:weather\" \"npm:dev:packing\"",
+    "dev:weather": "node --watch agents/weather/src/index.js",
+    "dev:packing": "node --watch agents/packing/src/index.js",
+    "start": "concurrently -n weather,packing -c cyan,magenta \"npm:start:weather\" \"npm:start:packing\"",
+    "start:weather": "node agents/weather/src/index.js",
+    "start:packing": "node agents/packing/src/index.js",
+    "test:weather": "bash scripts/test-weather.sh",
+    "test:packing": "bash scripts/test-packing.sh",
+    "test:all": "bash scripts/test-all.sh",
+    "test:degraded": "bash scripts/test-degraded.sh"
+  },
+  "keywords": ["a2a", "agent2agent", "agent", "weather", "packing", "json-rpc", "monorepo"],
+  "license": "MIT",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "helmet": "^7.1.0",
+    "morgan": "^1.10.0"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}
