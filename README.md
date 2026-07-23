@@ -1,4 +1,4 @@
-# A2A Agents
+# A2A Travel Packing and Weather Agents
 
 > Two interoperating Agent2Agent (A2A) agents in one repo: a **US Weather Agent** and a **Trip Packing Agent** that delegates to it. Run either one alone, or both together in a single Codespace.
 
