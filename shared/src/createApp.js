@@ -39,27 +39,22 @@ function createApp({
   app.use(helmet({ contentSecurityPolicy: false }));
   app.use(cors({ exposedHeaders: ['Content-Type'] }));
 
-  // Raw-body logging for diagnosing gateways that mangle requests.
-  // Must run before the JSON parser.
+  // Header logging for diagnosing gateways/callers. Headers are available
+  // without touching the request stream, so this is safe to run before the
+  // JSON parser. The BODY is logged separately, after parsing (see below) —
+  // reading the raw stream here would drain it and break express.json().
   if (debugBody) {
     app.use('/a2a', (req, res, next) => {
-      let raw = '';
-      req.on('data', (chunk) => {
-        raw += chunk;
+      console.log(`--- inbound /a2a (${serviceName}) @ ${new Date().toISOString()} ---`);
+      console.log(`  ${req.method} ${req.originalUrl} from ${req.ip}`);
+      // Full header dump, verbatim — the fastest way to see what an external
+      // caller (or a proxy in front of it) actually sent, including auth
+      // headers, content-type, and anything a gateway rewrote.
+      console.log('  headers       :');
+      Object.entries(req.headers).forEach(([k, v]) => {
+        console.log(`      ${k}: ${v}`);
       });
-      req.on('end', () => {
-        console.log(`--- inbound /a2a (${serviceName}) @ ${new Date().toISOString()} ---`);
-        console.log(`  ${req.method} ${req.originalUrl} from ${req.ip}`);
-        // Full header dump, verbatim — the fastest way to see what an external
-        // caller (or a proxy in front of it) actually sent, including auth
-        // headers, content-type, and anything a gateway rewrote.
-        console.log('  headers       :');
-        Object.entries(req.headers).forEach(([k, v]) => {
-          console.log(`      ${k}: ${v}`);
-        });
-        console.log('  raw body      :', raw || '(empty)');
-        next();
-      });
+      next();
     });
   }
 
@@ -80,6 +75,21 @@ function createApp({
     }
     next();
   });
+
+  // Body logging runs AFTER parsing, printing the already-read req.body so it
+  // never touches the raw stream. Empty object => the body did not parse (wrong
+  // content-type upstream, or no body forwarded).
+  if (debugBody) {
+    app.use('/a2a', (req, res, next) => {
+      const b = req.body;
+      const isEmpty = b && typeof b === 'object' && Object.keys(b).length === 0;
+      console.log(
+        `  body (${serviceName}):`,
+        isEmpty ? '(empty after parsing)' : JSON.stringify(b)
+      );
+      next();
+    });
+  }
 
   app.use(morgan(logFormat));
 
