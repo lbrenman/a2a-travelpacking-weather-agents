@@ -23,6 +23,7 @@ function createApp({
   authMode,
   logFormat = 'dev',
   debugBody = false,
+  logAuth = false,
   taskTtlMs,
   buildAgentCard,
   handleMessageSend,
@@ -47,11 +48,16 @@ function createApp({
         raw += chunk;
       });
       req.on('end', () => {
-        console.log(`--- inbound /a2a (${serviceName}) ---`);
-        console.log('  content-type  :', JSON.stringify(req.get('content-type')));
-        console.log('  content-length:', req.get('content-length'));
-        console.log('  x-api-key     :', req.get('x-api-key') ? '(present)' : '(absent)');
-        console.log('  raw body      :', raw);
+        console.log(`--- inbound /a2a (${serviceName}) @ ${new Date().toISOString()} ---`);
+        console.log(`  ${req.method} ${req.originalUrl} from ${req.ip}`);
+        // Full header dump, verbatim — the fastest way to see what an external
+        // caller (or a proxy in front of it) actually sent, including auth
+        // headers, content-type, and anything a gateway rewrote.
+        console.log('  headers       :');
+        Object.entries(req.headers).forEach(([k, v]) => {
+          console.log(`      ${k}: ${v}`);
+        });
+        console.log('  raw body      :', raw || '(empty)');
         next();
       });
     });
@@ -112,7 +118,7 @@ function createApp({
 
   // --- Authenticated A2A endpoint ---------------------------------------
 
-  const auth = createApiKeyAuth({ apiKey, authMode, agentName: serviceName });
+  const auth = createApiKeyAuth({ apiKey, authMode, agentName: serviceName, logAuth });
   app.use('/a2a', auth, createA2ARouter({ handleMessageSend, taskStore }));
 
   // --- Fallbacks --------------------------------------------------------
