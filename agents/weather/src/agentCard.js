@@ -1,7 +1,7 @@
 /**
- * US Weather Agent card (A2A protocol v0.3.0).
+ * US Weather Agent card (A2A protocol v1.0.0).
  */
-const PROTOCOL_VERSION = '0.3.0';
+const PROTOCOL_VERSION = '1.0';
 
 function baseUrl(req, publicUrl) {
   if (publicUrl) return publicUrl.replace(/\/+$/, '');
@@ -16,17 +16,19 @@ function createBuildAgentCard(cfg) {
     const endpoint = `${base}/a2a`;
 
     return {
-      protocolVersion: PROTOCOL_VERSION,
       name: cfg.agentName,
       description:
         'Returns the current conditions and short-term forecast for any US city and state. ' +
         'Send a message such as "Boston, MA" or "What is the weather in Austin, Texas?".',
 
-      // Spec 5.6.1: preferredTransport is REQUIRED and must be what's at `url`.
-      url: endpoint,
-      preferredTransport: 'JSONRPC',
-      // Spec 5.6.2: should include an entry matching the main url/transport.
-      additionalInterfaces: [{ url: endpoint, transport: 'JSONRPC' }],
+      // A2A 1.0.0: endpoint and transport declared in supportedInterfaces
+      supportedInterfaces: [
+        {
+          url: endpoint,
+          protocolBinding: 'JSONRPC',
+          protocolVersion: PROTOCOL_VERSION,
+        },
+      ],
 
       version: cfg.agentVersion,
       documentationUrl: `${base}/`,
@@ -34,32 +36,25 @@ function createBuildAgentCard(cfg) {
       capabilities: {
         streaming: false,
         pushNotifications: false,
-        stateTransitionHistory: false
+        extendedAgentCard: false,
       },
 
-      // JSON-RPC transport is always application/json; text/plain describes
-      // the media type of individual message parts.
       defaultInputModes: ['application/json', 'text/plain'],
       defaultOutputModes: ['application/json', 'text/plain'],
 
-      //this is as per a2a protocol v.1.0.0 - https://a2a-protocol.org/v1.0.0/specification/#441-agentcard
-      securityRequirements: [
-        {
-            "schemes": {
-              "apiKey": []
-            }
-          }
-      ],
-
+      // A2A 1.0.0: SecurityScheme discriminated union + securityRequirements with StringList
       securitySchemes: {
-          apiKey: {
-            apiKeySecurityScheme:{
+        apiKey: {
+          apiKeySecurityScheme: {
             location: 'header',
             name: 'x-api-key',
-            description: 'Static API key issued by the agent operator.'
-          }
-        }
+            description: 'Static API key issued by the agent operator.',
+          },
+        },
       },
+      securityRequirements: [
+        { schemes: { apiKey: { list: [] } } },
+      ],
 
       skills: [
         {
@@ -76,11 +71,9 @@ function createBuildAgentCard(cfg) {
             'Denver CO'
           ],
           inputModes: ['application/json', 'text/plain'],
-          outputModes: ['application/json', 'text/plain']
-        }
+          outputModes: ['application/json', 'text/plain'],
+        },
       ],
-
-      supportsAuthenticatedExtendedCard: false
     };
   };
 }

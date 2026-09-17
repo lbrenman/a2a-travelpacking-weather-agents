@@ -1,7 +1,7 @@
 /**
- * Trip Packing Agent card (A2A protocol v0.3.0).
+ * Trip Packing Agent card (A2A protocol v1.0.0).
  */
-const PROTOCOL_VERSION = '0.3.0';
+const PROTOCOL_VERSION = '1.0';
 
 function baseUrl(req, publicUrl) {
   if (publicUrl) return publicUrl.replace(/\/+$/, '');
@@ -17,16 +17,20 @@ function createBuildAgentCard(cfg) {
     const enriched = Boolean(cfg.weatherAgentUrl) && cfg.weatherEnrichment;
 
     return {
-      protocolVersion: PROTOCOL_VERSION,
       name: cfg.agentName,
       description:
         'Builds a packing list for a US destination and trip length. Send a message such as ' +
         '"Boston, MA for 5 days" or "a week in Portland, OR". Produces a seasonal list on its ' +
         'own, and refines it with live forecast data when a weather agent is reachable.',
 
-      url: endpoint,
-      preferredTransport: 'JSONRPC',
-      additionalInterfaces: [{ url: endpoint, transport: 'JSONRPC' }],
+      // A2A 1.0.0: endpoint and transport declared in supportedInterfaces
+      supportedInterfaces: [
+        {
+          url: endpoint,
+          protocolBinding: 'JSONRPC',
+          protocolVersion: PROTOCOL_VERSION,
+        },
+      ],
 
       version: cfg.agentVersion,
       documentationUrl: `${base}/`,
@@ -34,30 +38,25 @@ function createBuildAgentCard(cfg) {
       capabilities: {
         streaming: false,
         pushNotifications: false,
-        stateTransitionHistory: false
+        extendedAgentCard: false,
       },
 
       defaultInputModes: ['application/json', 'text/plain'],
       defaultOutputModes: ['application/json', 'text/plain'],
 
-      //this is as per a2a protocol v.1.0.0 - https://a2a-protocol.org/v1.0.0/specification/#441-agentcard
-      securityRequirements: [
-        {
-            "schemes": {
-              "apiKey": []
-            }
-          }
-      ],
-
+      // A2A 1.0.0: SecurityScheme discriminated union + securityRequirements with StringList
       securitySchemes: {
-          apiKey: {
-            apiKeySecurityScheme:{
+        apiKey: {
+          apiKeySecurityScheme: {
             location: 'header',
             name: 'x-api-key',
-            description: 'Static API key issued by the agent operator.'
-          }
-        }
+            description: 'Static API key issued by the agent operator.',
+          },
+        },
       },
+      securityRequirements: [
+        { schemes: { apiKey: { list: [] } } },
+      ],
 
       skills: [
         {
@@ -96,7 +95,6 @@ function createBuildAgentCard(cfg) {
           : [])
       ],
 
-      supportsAuthenticatedExtendedCard: false
     };
   };
 }
