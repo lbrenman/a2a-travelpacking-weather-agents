@@ -40,15 +40,24 @@ function createBuildAgentCard(cfg) {
       defaultInputModes: ['application/json', 'text/plain'],
       defaultOutputModes: ['application/json', 'text/plain'],
 
+      //this is as per a2a protocol v.1.0.0 - https://a2a-protocol.org/v1.0.0/specification/#441-agentcard
+      securityRequirements: [
+        {
+            "schemes": {
+              "apiKey": []
+            }
+          }
+      ],
+
       securitySchemes: {
-        apiKey: {
-          type: 'apiKey',
-          in: 'header',
-          name: 'x-api-key',
-          description: 'Static API key issued by the agent operator.'
+          apiKey: {
+            apiKeySecurityScheme:{
+            location: 'header',
+            name: 'x-api-key',
+            description: 'Static API key issued by the agent operator.'
+          }
         }
       },
-      security: [{ apiKey: [] }],
 
       skills: [
         {
