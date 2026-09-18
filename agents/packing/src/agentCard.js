@@ -23,7 +23,8 @@ function createBuildAgentCard(cfg) {
         '"Boston, MA for 5 days" or "a week in Portland, OR". Produces a seasonal list on its ' +
         'own, and refines it with live forecast data when a weather agent is reachable.',
 
-      // A2A 1.0.0: endpoint and transport declared in supportedInterfaces
+      // A2A 1.0.0: url still required by validator; endpoint also declared in supportedInterfaces
+      url: endpoint,
       supportedInterfaces: [
         {
           url: endpoint,

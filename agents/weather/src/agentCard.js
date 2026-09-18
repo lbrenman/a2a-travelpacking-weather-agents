@@ -21,7 +21,8 @@ function createBuildAgentCard(cfg) {
         'Returns the current conditions and short-term forecast for any US city and state. ' +
         'Send a message such as "Boston, MA" or "What is the weather in Austin, Texas?".',
 
-      // A2A 1.0.0: endpoint and transport declared in supportedInterfaces
+      // A2A 1.0.0: url still required by validator; endpoint also declared in supportedInterfaces
+      url: endpoint,
       supportedInterfaces: [
         {
           url: endpoint,
